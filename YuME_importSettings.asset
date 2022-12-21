@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fc0c88a613c3f74eb7a86a394263bed, type: 3}
+  m_Name: YuME_importSettings
+  m_EditorClassIdentifier: 
+  sourceTiles: {fileID: 919132149155446097, guid: fdc8d74feef0e094381968577a2428e9, type: 3}
+  sourceMaterial: {fileID: 2100000, guid: b6c1c831675c9334dabd6a907fb5e73a, type: 2}
+  sourceTexture: {fileID: 2800000, guid: e8d69f4783d236245bc6d7424a6a4e03, type: 3}
+  layer:
+    serializedVersion: 2
+    m_Bits: 3
+  tileStatic: 1
+  shadowCastingMode: 1
+  receiveShadows: 1
+  altIdentifier: _alt
+  bypassCollisionSetup: 0
+  importCollision: 1
+  collisionIdentifier: _collision
+  importCustomBounds: 1
+  customBoundsIdentifier: _bounds
+  splitByType: 0
+  destinationFolder: Assets/Environment/TileSets/Test Environment
+  meshFolder: Assets/Environment/TileSets/Test Environment/Meshes
+  appendName: 
+  c_name: Base Env Tileset
+  c_tileStatic: 1
+  c_scale: 1
+  c_offset: {x: 0, y: -0.5, z: 0}
+  c_shadowCastingMode: 1
+  c_receiveShadows: 1
+  c_bypassCollisionSetup: 0
+  c_destinationFolder: Assets/Tilesets/Base Environment/TileSet
+  c_sourceFolder: Assets/Tilesets/Base Environment/Prefabs
+  c_appendName: 

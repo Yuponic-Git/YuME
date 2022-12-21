@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 816e6f07ddca9b0498860ba622212724, type: 3}
+  m_Name: PrototypeTiles_tileSet
+  m_EditorClassIdentifier: 
+  tileSetName: PrototypeTiles
+  customBrushDestinationFolder: Assets/Yuponic/YuME/PrototypeTiles/CustomBrushes
+  tileData:
+  - Assets/Yuponic/YuME/PrototypeTiles/a00Block_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/a00Block_YuME/a00Block_alt_01_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/a00Block_YuME/a00Block_alt_02_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/a00Block_YuME/a00Block_alt_03_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/a01HalfBlock_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/a02Floor_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/a03FloorHigh_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/a04SlopeLow_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/a05SlopeHigh_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/a06SlopeSteep_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/a07StepsLow_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/a08StepsHigh_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/a09StepsSteep_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/b00Wall_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/b01WallCorner_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/b02WallInvCorner_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/b03FlatWallBack_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/b04FlatWallFront_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/b05CurveWall_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/b06InvCurveWall_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/b07BlockDiagonal_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/b08SlopeLowCorner_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/b09SlopeHighCorner_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/b10Pillar_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/c00Danger_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/c01DangerWallConnect_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/c02DangerWallConnectCorner_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/c03DangerFloorConnect_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/c04DangerFloorConnectCorner_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/c05DangerFloorConnectInvCorner_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/c06DangerFloorConnectInvCornerConnect_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/d00DoorFrameMid_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/d01DoorFrameMidStack_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/d02DoorFrameFull_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/d03DoorFrameFullStack_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/d04DoorFrameDoubleMid_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/d05DoorFrameDoubleMidStack_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/d06DoorFrameDoubleFull_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/d07DoorFrameDoubleFullStack_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/d08DoorFrameDoubleInvCornerFull_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/d09DoorFrameDoubleInvCornerFullStack_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/d10DoorFrameDoubleCornerFull_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/d11DoorFrameDoubleCornerFullStack_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/e00BarrierStraight_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/e01FenceCorner_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/e02BarrierInvCorner_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/e03BarrierDeadEnd_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/e04BarrierStraightDouble_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/e05BarrierEndCap_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/e06BarrierSlope_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/e07BarrierSlopeDouble_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/f00CurveWall3x_YuME.prefab
+  - Assets/Yuponic/YuME/PrototypeTiles/f01InvCurveWall3x_YuME.prefab
+  customBrushData: []

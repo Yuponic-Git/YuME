@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba10c9cd028c5284ab1421f68266d540, type: 3}
+  m_Name: YuME_editorSetupData
+  m_EditorClassIdentifier: 
+  mapEditorHeader: {fileID: 2800000, guid: 1ced3a895c353429fac7d7e0ddffb3cc, type: 3}
+  tileImporterHeader: {fileID: 2800000, guid: 8b77ae4c4c8384fb998a0bc2fcc47498, type: 3}
+  tileconverterHeader: {fileID: 2800000, guid: eb3b9c12f85fd40fb87deab98091ef0b, type: 3}
+  configButton: {fileID: 2800000, guid: c75cd28087a2b8e4992d858f5663647f, type: 3}
+  primaryIconData:
+  - {fileID: 2800000, guid: 18c57bf2f903cec48806ea0036eccff7, type: 3}
+  - {fileID: 2800000, guid: 71c3c23caea7d7946bba348158d0f3a9, type: 3}
+  - {fileID: 2800000, guid: f11de1280180e8547987aa8ea6ebd0d6, type: 3}
+  - {fileID: 2800000, guid: 6b1f41d252ff14545a9b2ebf8611a97d, type: 3}
+  - {fileID: 2800000, guid: ad909c41e1f4b244c84dab4dd8093333, type: 3}
+  primaryIconTooltip:
+  - Default Unity Tools [ESC]
+  - Paint Tiles Brush {A}
+  - Pick Tile Brush [S]
+  - Erase Brush [D]
+  - Selection Tool
+  secondaryIconData:
+  - {fileID: 2800000, guid: 4fefc7717f16108438c56dbe6ab42791, type: 3}
+  - {fileID: 2800000, guid: 48bdf25033bc7ba449ede33d44f7170f, type: 3}
+  - {fileID: 2800000, guid: bf4b02f86bb352c4483e4c2f41fc6a7b, type: 3}
+  - {fileID: 2800000, guid: 42eacc445ed758140b6a80a784605da2, type: 3}
+  - {fileID: 2800000, guid: c946967e90283d94bb1486694d0a1169, type: 3}
+  - {fileID: 2800000, guid: 39cd6c6ac3be337438473c064ac6ca39, type: 3}
+  - {fileID: 2800000, guid: a6b899e6c22966b4384b29d25d87c24e, type: 3}
+  - {fileID: 2800000, guid: 00fae36c64a585a4e90ca2dc5266ae14, type: 3}
+  - {fileID: 2800000, guid: 58a907e4533ce8544a9cb278699729f7, type: 3}
+  secondaryIconTooltip:
+  - Toggle Tile Gizmo
+  - Isolate Tiles on Grid Plane
+  - Move Grid Up (Hold ALT for 0.25 grid changes)
+  - Move Grid Down (Hold ALT for 0.25 grid changes)
+  - Rotate Tile [Y Axis]
+  - Rotate Tile [X Axis]
+  - Flip X Axis
+  - Flip Z Axis
+  - Refresh the map if scales look wrong after reimporting a tileset
+  selectIconData:
+  - {fileID: 2800000, guid: e7b392354bb9bad4a9a19ea7f9aa7535, type: 3}
+  - {fileID: 2800000, guid: dd2e6c87483089d418c6250815497031, type: 3}
+  - {fileID: 2800000, guid: bc6df09e60e85b8428b35e82e6e9774c, type: 3}
+  - {fileID: 2800000, guid: fea3f023a126dfb428c31a6d45ee1ce0, type: 3}
+  selectionIconTooltip:
+  - Copy Selected Tiles to Brush
+  - Cut Selected Tiles to Brush
+  - Create Custom Brush from Selected Tiles
+  - Delete Selected Tiles
+  layerIconData:
+  - {fileID: 2800000, guid: 48bdf25033bc7ba449ede33d44f7170f, type: 3}
+  - {fileID: 2800000, guid: cb2e710426fd8ae489e0d5dc479c1778, type: 3}
+  - {fileID: 2800000, guid: da7a8164eec97634c9217a7ea8028624, type: 3}
+  layerIconTooltip:
+  - Isolate Tile on Current Layer
+  - Next Layer
+  - Previous Layer
