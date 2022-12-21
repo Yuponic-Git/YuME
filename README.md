@@ -18,4 +18,6 @@ Features:
 - Use layers to maximise the reuse of your assets
 - Includes full source code, no DLLs.
 
+Install to your [asset folder]/Yuponic/YuME.
+
 Nic.
