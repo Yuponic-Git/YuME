@@ -31,11 +31,11 @@ MonoBehaviour:
   gridHeight: 0
   gridColorNormal: {r: 0.32, g: 0.28, b: 0.28, a: 1}
   gridColorBorder: {r: 0.19, g: 0.34, b: 0.54, a: 1}
-  gridColorFill: {r: 0.36, g: 0.36, b: 0.36, a: 0.8156863}
+  gridColorFill: {r: 0.36, g: 0.36, b: 0.36, a: 0.78}
   gridOffset: 0.01
   gridLayerHeightScaler: 1
   gridDimensions: {x: 40, y: 40}
-  gridScaleFactor: 4
+  gridScaleFactor: 2
   invertMouseWheel: 0
   initialOffset: {x: 0, y: 0, z: 0}
   twoPointFiveDMode: 0

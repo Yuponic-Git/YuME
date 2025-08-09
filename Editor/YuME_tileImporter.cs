@@ -113,20 +113,6 @@ class YuME_tileImporter : EditorWindow
         }
 
 		EditorGUILayout.EndVertical();
-        
-        // ----------------------------------------------------------------------------------------------------
-        // ------ Layer Settings
-        // ----------------------------------------------------------------------------------------------------
-
-        EditorGUILayout.Space();
-
-        EditorGUILayout.LabelField("Layer Setup", EditorStyles.boldLabel);
-
-        EditorGUILayout.BeginVertical("box");
-
-        userSettings.layer = EditorGUILayout.LayerField("Tileset Layer", userSettings.layer);
-
-        EditorGUILayout.EndVertical();
 
         // ----------------------------------------------------------------------------------------------------
         // ------ Static Settings
@@ -256,6 +242,12 @@ class YuME_tileImporter : EditorWindow
         }
         
         userSettings.destinationFolder = YuTools_Utils.shortenAssetPath(userSettings.destinationFolder);
+        
+        // Ensure destinationFolder is never empty or invalid
+        if (string.IsNullOrEmpty(userSettings.destinationFolder) || !userSettings.destinationFolder.StartsWith("Assets/"))
+        {
+            userSettings.destinationFolder = "Assets/";
+        }
 
         EditorGUILayout.Space();
 
@@ -276,6 +268,12 @@ class YuME_tileImporter : EditorWindow
         EditorGUILayout.EndVertical();
 
         userSettings.meshFolder = YuTools_Utils.shortenAssetPath(userSettings.meshFolder);
+        
+        // Ensure meshFolder is never empty or invalid
+        if (string.IsNullOrEmpty(userSettings.meshFolder) || !userSettings.meshFolder.StartsWith("Assets/"))
+        {
+            userSettings.meshFolder = "Assets/";
+        }
 
         // ----------------------------------------------------------------------------------------------------
         // ------ Import Button 
@@ -458,7 +456,6 @@ class YuME_tileImporter : EditorWindow
 
                         // Set the template gameobject name to the destination prefab name based in the object being imported
                         tileParentObject.name = userSettings.appendName + child.name;
-                        tileParentObject.layer = userSettings.layer;
                         tileParentObject.transform.localScale = child.transform.localScale;
                         tileMeshDataObject.name = userSettings.appendName + child.name + "Tile";
 
@@ -468,7 +465,6 @@ class YuME_tileImporter : EditorWindow
                         tileMeshFilter.sharedMesh = recenterMesh(child.GetComponent<MeshFilter>().sharedMesh);
 
                         tileMeshDataObject.transform.position = setTheTileMeshObjectOffsetFromTheParent(tileMeshFilter.sharedMesh.bounds.extents);
-                        tileMeshDataObject.layer = userSettings.layer;
 
                         attachCustomCollisionMesh(); // check if the object has a custom collision mesh and perform setup
 
@@ -481,20 +477,12 @@ class YuME_tileImporter : EditorWindow
                             if (prefabAlreadyCreated != null)
                             {
                                 updatedPrefabsCounter++; // increment the counter of updated prefabs for the finished log
-//#if UNITY_2018_3_OR_NEWER
-//                                PrefabUtility.SaveAsPrefabAssetAndConnect(tileParentObject, userSettings.destinationFolder + "/" + userSettings.appendName + child.name + "_YuME.prefab", InteractionMode.AutomatedAction);
-//#else
-                                PrefabUtility.ReplacePrefab(tileParentObject, prefabAlreadyCreated, ReplacePrefabOptions.ReplaceNameBased); // replace the existing prefab with the updated data
-//#endif
+                                PrefabUtility.SaveAsPrefabAssetAndConnect(tileParentObject, userSettings.destinationFolder + "/" + userSettings.appendName + child.name + "_YuME.prefab", InteractionMode.AutomatedAction);
                             }
                             else
                             {
                                 newPrefabsCounter++; // increment the counter of new prefabs for the finished log
-//#if UNITY_2018_3_OR_NEWER
-//                                PrefabUtility.SaveAsPrefabAsset(tileParentObject, userSettings.destinationFolder + "/" + tileParentObject.name + "_YuME.prefab");
-//#else
-                                PrefabUtility.CreatePrefab(userSettings.destinationFolder + "/" + tileParentObject.name + "_YuME.prefab", tileParentObject);
-//#endif
+                                PrefabUtility.SaveAsPrefabAsset(tileParentObject, userSettings.destinationFolder + "/" + tileParentObject.name + "_YuME.prefab");
                             }
 
                             tilesetData.tileData.Add(userSettings.destinationFolder + "/" + tileParentObject.name + "_YuME.prefab");
@@ -515,20 +503,12 @@ class YuME_tileImporter : EditorWindow
                             if (prefabAlreadyCreated != null)
                             {
                                 updatedPrefabsCounter++; // increment the counter of updated prefabs for the finished log
-//#if UNITY_2018_3_OR_NEWER
-//                                PrefabUtility.SaveAsPrefabAssetAndConnect(tileParentObject, userSettings.destinationFolder + "/" + masterTileName[0] + "/" + userSettings.appendName + child.name + "_YuME.prefab", InteractionMode.AutomatedAction);
-//#else
-                                PrefabUtility.ReplacePrefab(tileParentObject, prefabAlreadyCreated, ReplacePrefabOptions.ReplaceNameBased); // replace the existing prefab with the updated data
-//#endif
+                                PrefabUtility.SaveAsPrefabAssetAndConnect(tileParentObject, userSettings.destinationFolder + "/" + masterTileName[0] + "/" + userSettings.appendName + child.name + "_YuME.prefab", InteractionMode.AutomatedAction);
                             }
                             else
                             {
                                 newPrefabsCounter++; // increment the counter of new prefabs for the finished log
-//#if UNITY_2018_3_OR_NEWER
-//                                PrefabUtility.SaveAsPrefabAsset(tileParentObject, userSettings.destinationFolder + "/" + masterTileName[0] + "/" + tileParentObject.name + "_YuME.prefab");
-//#else
-                                PrefabUtility.CreatePrefab(userSettings.destinationFolder + "/" + masterTileName[0] + "/" + tileParentObject.name + "_YuME.prefab", tileParentObject);
-//#endif
+                                PrefabUtility.SaveAsPrefabAsset(tileParentObject, userSettings.destinationFolder + "/" + masterTileName[0] + "/" + tileParentObject.name + "_YuME.prefab");
                             }
 
                             tilesetData.tileData.Add(userSettings.destinationFolder + "/" + masterTileName[0] + "/" + tileParentObject.name + "_YuME.prefab");
@@ -575,18 +555,29 @@ class YuME_tileImporter : EditorWindow
         totalMeshesInSourceObject = 0f;
         tileImportProgress = 1f;
 
+        if (userSettings.sourceTiles == null)
+        {
+            Debug.LogWarning("YuME: Cannot scan meshes - source tiles object is null");
+            return;
+        }
+
         foreach (Transform child in userSettings.sourceTiles.transform)
         {
+            if (child == null) continue;
+
             if (!(child.name.Contains(userSettings.collisionIdentifier) || child.name.Contains(userSettings.customBoundsIdentifier)))
             {
-                if (child.GetComponent<MeshFilter>() != null)
+                var meshFilter = child.GetComponent<MeshFilter>();
+                if (meshFilter != null && meshFilter.sharedMesh != null)
                 {
-                    if (child.GetComponent<MeshFilter>().sharedMesh != null)
-                    {
-                        totalMeshesInSourceObject++;
-                    }
+                    totalMeshesInSourceObject++;
                 }
             }
+        }
+
+        if (totalMeshesInSourceObject == 0)
+        {
+            Debug.LogWarning("YuME: No valid meshes found in source tiles object");
         }
     }
 
@@ -595,21 +586,34 @@ class YuME_tileImporter : EditorWindow
         // Check if a custom collision mesh is being used. If no mesh is found the mesh collider defauls to the mesh unless collsion importing is bypassed
         if (!userSettings.bypassCollisionSetup && userSettings.importCollision)
         {
-			tileMeshCollider.sharedMesh = tileMeshFilter.sharedMesh;
-
-			foreach (Transform collisionMesh in userSettings.sourceTiles.transform) // search the source file for the associated collision mesh based the identifer setup in the tool
+            if (tileMeshCollider != null && tileMeshFilter != null)
             {
-                if (collisionMesh.name == tileParentObject.name + userSettings.collisionIdentifier) // check to see if we found the collision mesh
+                tileMeshCollider.sharedMesh = tileMeshFilter.sharedMesh;
+
+                if (userSettings.sourceTiles != null)
                 {
-                    tileMeshCollider.sharedMesh = recenterMesh(collisionMesh.GetComponent<MeshFilter>().sharedMesh); // recenter the collision mesh so it matches the source mesh
-                    return;
+                    foreach (Transform collisionMesh in userSettings.sourceTiles.transform) // search the source file for the associated collision mesh based the identifer setup in the tool
+                    {
+                        if (collisionMesh != null && collisionMesh.name == tileParentObject.name + userSettings.collisionIdentifier) // check to see if we found the collision mesh
+                        {
+                            var collisionMeshFilter = collisionMesh.GetComponent<MeshFilter>();
+                            if (collisionMeshFilter != null && collisionMeshFilter.sharedMesh != null)
+                            {
+                                tileMeshCollider.sharedMesh = recenterMesh(collisionMeshFilter.sharedMesh); // recenter the collision mesh so it matches the source mesh
+                                return;
+                            }
+                        }
+                    }
                 }
             }
         }
-		else if (!userSettings.bypassCollisionSetup && !userSettings.importCollision)
-		{
-            tileMeshCollider.sharedMesh = tileMeshFilter.sharedMesh;
-		}
+        else if (!userSettings.bypassCollisionSetup && !userSettings.importCollision)
+        {
+            if (tileMeshCollider != null && tileMeshFilter != null)
+            {
+                tileMeshCollider.sharedMesh = tileMeshFilter.sharedMesh;
+            }
+        }
     }
 
     static Bounds findCustomBoundsMesh(Mesh sourceMesh)
@@ -661,7 +665,18 @@ class YuME_tileImporter : EditorWindow
         recenteredMesh.vertices = vertices;
         recenteredMesh.RecalculateBounds();
 
-        AssetDatabase.CreateAsset(recenteredMesh, userSettings.meshFolder + "/" + sourceMesh.name + ".asset");
+        // Ensure meshFolder path is valid
+        string meshFolderPath = userSettings.meshFolder;
+        if (string.IsNullOrEmpty(meshFolderPath) || !meshFolderPath.StartsWith("Assets/"))
+        {
+            meshFolderPath = "Assets/";
+        }
+        
+        // Create the folder if it doesn't exist
+        YuTools_Utils.ensureFolderExists(meshFolderPath);
+
+        string assetPath = meshFolderPath + "/" + sourceMesh.name + ".asset";
+        AssetDatabase.CreateAsset(recenteredMesh, assetPath);
 
         return recenteredMesh;
     }
@@ -672,11 +687,7 @@ class YuME_tileImporter : EditorWindow
         {
             foreach(Transform child in YuME_mapEditor.tileMapParent.transform)
             {
-//#if UNITY_2018_3_OR_NEWER
-//                PrefabUtility.RevertPrefabInstance(child.gameObject, InteractionMode.AutomatedAction);
-//#else
-                PrefabUtility.RevertPrefabInstance(child.gameObject);
-//#endif
+                PrefabUtility.RevertPrefabInstance(child.gameObject, InteractionMode.AutomatedAction);
             }
         }
     }
@@ -716,11 +727,7 @@ class YuME_tileImporter : EditorWindow
                     }
                 }
 
-#if UNITY_2018_3_OR_NEWER
                 PrefabUtility.SaveAsPrefabAssetAndConnect(newTileParent, userSettings.destinationFolder + "/CustomBrushes/" + brush.name + ".prefab", InteractionMode.AutomatedAction);
-#else
-                PrefabUtility.ReplacePrefab(newTileParent, prefabAlreadyCreated, ReplacePrefabOptions.ReplaceNameBased); // replace the existing prefab with the updated data
-#endif
                 DestroyImmediate(newTileParent);
                 customBrushCounter++;
             }

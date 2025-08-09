@@ -103,11 +103,7 @@ public class YuME_customBrushFunctions : EditorWindow
 
             // Add the prefab to the project
 
-#if UNITY_2018_3_OR_NEWER
             PrefabUtility.SaveAsPrefabAsset(tileParentObject, destinationPath + tileParentObject.name);
-#else
-            PrefabUtility.CreatePrefab(destinationPath + tileParentObject.name, tileParentObject);
-#endif
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh(); // refesh the asset database to tell unity changes have been made
 
@@ -150,14 +146,27 @@ public class YuME_customBrushFunctions : EditorWindow
 
     public static GameObject getPrefabFromCurrentTiles(GameObject source)
     {
+        if (source == null)
+        {
+            Debug.LogWarning("YuME: Cannot get prefab from null source object");
+            return null;
+        }
+
+        if (YuME_mapEditor.currentTileSetObjects == null)
+        {
+            Debug.LogWarning("YuME: Current tileset objects list is null");
+            return null;
+        }
+
         foreach(GameObject tile in YuME_mapEditor.currentTileSetObjects)
         {
-            if(tile.name == source.name)
+            if(tile != null && tile.name == source.name)
             {
                 return tile;
             }
         }
 
+        Debug.LogWarning($"YuME: Could not find prefab matching source object: {source.name}");
         return null;
     }
 
@@ -166,40 +175,70 @@ public class YuME_customBrushFunctions : EditorWindow
 
     public static void pasteCustomBrush(Vector3 position)
     {
-        if (YuME_mapEditor.brushTile != null)
+        if (YuME_mapEditor.brushTile == null)
         {
-            if (YuME_mapEditor.findTileMapParent())
+            Debug.LogWarning("YuME: Cannot paste custom brush - brush tile is null");
+            return;
+        }
+
+        if (!YuME_mapEditor.findTileMapParent())
+        {
+            Debug.LogWarning("YuME: Cannot paste custom brush - no tile map parent found");
+            return;
+        }
+
+        if (YuME_mapEditor.mapLayers == null || YuME_mapEditor.currentLayer < 1 || YuME_mapEditor.currentLayer > YuME_mapEditor.mapLayers.Length)
+        {
+            Debug.LogWarning("YuME: Cannot paste custom brush - invalid layer selection");
+            return;
+        }
+
+        int badTileCount = 0;
+
+        foreach (Transform child in YuME_mapEditor.brushTile.transform)
+        {
+            if (child == null) continue;
+
+            try
             {
-                int badTileCount = 0;
+                GameObject pasteTile = PrefabUtility.InstantiatePrefab(getPrefabFromCurrentTiles(child.gameObject) as GameObject) as GameObject;
 
-                foreach (Transform child in YuME_mapEditor.brushTile.transform)
+                if (pasteTile != null)
                 {
-                    GameObject pasteTile = PrefabUtility.InstantiatePrefab(getPrefabFromCurrentTiles(child.gameObject) as GameObject) as GameObject;
-
-                    if (pasteTile != null)
+                    child.position = normalizePosition(child.position);
+                    YuME_tileFunctions.eraseTile(child.position);
+                    pasteTile.transform.eulerAngles = child.eulerAngles;
+                    pasteTile.transform.position = child.position;
+                    pasteTile.transform.localScale = child.transform.lossyScale;
+                    
+                    var targetLayer = YuME_mapEditor.mapLayers[YuME_mapEditor.currentLayer - 1];
+                    if (targetLayer != null)
                     {
-                        child.position = normalizePosition(child.position);
-                        YuME_tileFunctions.eraseTile(child.position);
-                        pasteTile.transform.eulerAngles = child.eulerAngles;
-                        pasteTile.transform.position = child.position;
-                        pasteTile.transform.localScale = child.transform.lossyScale;
-                        pasteTile.transform.parent = YuME_mapEditor.mapLayers[YuME_mapEditor.currentLayer - 1].transform;
-
+                        pasteTile.transform.parent = targetLayer.transform;
                     }
                     else
                     {
-                        badTileCount++;
+                        Debug.LogWarning("YuME: Target layer is null, placing tile without parent");
                     }
                 }
-
-                if(badTileCount > 0)
+                else
                 {
-                    Debug.Log("Custom Brush includes tiles from a different tile set. These tiles will not appear in the scene due to the lack of nested prefabs in Unity.");
+                    badTileCount++;
                 }
-
-                EditorSceneManager.MarkAllScenesDirty();
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"YuME: Failed to paste brush tile: {e.Message}");
+                badTileCount++;
             }
         }
+
+        if(badTileCount > 0)
+        {
+            Debug.LogWarning($"YuME: Custom Brush includes {badTileCount} tiles from a different tile set. These tiles will not appear in the scene due to the lack of nested prefabs in Unity.");
+        }
+
+        EditorSceneManager.MarkAllScenesDirty();
     }
     
 
@@ -231,11 +270,7 @@ public class YuME_customBrushFunctions : EditorWindow
 
                 foreach (GameObject tile in YuME_mapEditor.selectedTiles)
                 {
-#if UNITY_2018_3_OR_NEWER
                     GameObject tempTile = (GameObject)PrefabUtility.InstantiatePrefab(PrefabUtility.GetCorrespondingObjectFromSource(tile) as GameObject);
-#else
-                    GameObject tempTile = (GameObject)PrefabUtility.InstantiatePrefab(PrefabUtility.GetPrefabParent(tile) as GameObject);
-#endif
                     tempTile.transform.parent = YuME_mapEditor.brushTile.transform;
                     tempTile.transform.position = tile.transform.position;
                     tempTile.transform.eulerAngles = tile.transform.eulerAngles;
@@ -266,11 +301,7 @@ public class YuME_customBrushFunctions : EditorWindow
 
                 foreach (Transform child in YuME_mapEditor.brushTile.transform)
                 {
-#if UNITY_2018_3_OR_NEWER
                     GameObject pasteTile = (GameObject)PrefabUtility.InstantiatePrefab(PrefabUtility.GetCorrespondingObjectFromSource(child.gameObject) as GameObject);
-#else
-                    GameObject pasteTile = (GameObject)PrefabUtility.InstantiatePrefab(PrefabUtility.GetPrefabParent(child.gameObject) as GameObject);
-#endif
                     YuME_tileFunctions.eraseTile(child.position);
                     pasteTile.transform.eulerAngles = child.eulerAngles;
                     pasteTile.transform.position = normalizePosition(child.position);

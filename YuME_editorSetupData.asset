@@ -23,10 +23,10 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 6b1f41d252ff14545a9b2ebf8611a97d, type: 3}
   - {fileID: 2800000, guid: ad909c41e1f4b244c84dab4dd8093333, type: 3}
   primaryIconTooltip:
-  - Default Unity Tools [ESC]
+  - 'Default Unity Tools [ESC]'
   - Paint Tiles Brush {A}
-  - Pick Tile Brush [S]
-  - Erase Brush [D]
+  - 'Pick Tile Brush [S]'
+  - 'Erase Brush [D]'
   - Selection Tool
   secondaryIconData:
   - {fileID: 2800000, guid: 4fefc7717f16108438c56dbe6ab42791, type: 3}
@@ -43,8 +43,8 @@ MonoBehaviour:
   - Isolate Tiles on Grid Plane
   - Move Grid Up (Hold ALT for 0.25 grid changes)
   - Move Grid Down (Hold ALT for 0.25 grid changes)
-  - Rotate Tile [Y Axis]
-  - Rotate Tile [X Axis]
+  - 'Rotate Tile [Y Axis]'
+  - 'Rotate Tile [X Axis]'
   - Flip X Axis
   - Flip Z Axis
   - Refresh the map if scales look wrong after reimporting a tileset

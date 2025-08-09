@@ -8,7 +8,6 @@ public class YuME_importerSettings : ScriptableObject
     public Material sourceMaterial = null;
     public Texture sourceTexture = null;
 
-    public LayerMask layer;
     public bool tileStatic = true;
 
     public int shadowCastingMode = 1;

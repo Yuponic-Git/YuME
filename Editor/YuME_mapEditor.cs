@@ -250,20 +250,10 @@ public class YuME_mapEditor : EditorWindow
         // ----------------------------------------------------------------------------------------------------
 
         currentScene = EditorSceneManager.GetActiveScene().name;
-#if UNITY_2019_1_OR_NEWER
         SceneView.duringSceneGui -= OnSceneGUI;
         SceneView.duringSceneGui += OnSceneGUI;
-#else
-        SceneView.onSceneGUIDelegate -= OnSceneGUI;
-        SceneView.onSceneGUIDelegate += OnSceneGUI;
-#endif 
-#if UNITY_2017
-        EditorApplication.hierarchyWindowChanged -= OnSceneChanged;
-        EditorApplication.hierarchyWindowChanged += OnSceneChanged;
-#else
         EditorApplication.hierarchyChanged -= OnSceneChanged;
         EditorApplication.hierarchyChanged += OnSceneChanged;
-#endif
 
         findUI();
         if(toolEnabled)
@@ -285,16 +275,8 @@ public class YuME_mapEditor : EditorWindow
 
     void OnDestroy()
     {
-#if UNITY_2019_1_OR_NEWER
         SceneView.duringSceneGui -= OnSceneGUI;
-#else
-        SceneView.onSceneGUIDelegate -= OnSceneGUI;
-#endif
-#if UNITY_2017
-        EditorApplication.hierarchyWindowChanged -= OnSceneChanged;
-#else
         EditorApplication.hierarchyChanged -= OnSceneChanged;
-#endif
     }
 
     void OnSelectionChange()
@@ -837,19 +819,29 @@ public class YuME_mapEditor : EditorWindow
 
     static void showUI(bool showState)
     {
-        if (editorPreferences.hideUIObjects)
+        if (editorPreferences != null && editorPreferences.hideUIObjects)
         {
             uiState = showState;
 
-            for (int i = 0; i < uiObjects.Count; i++)
+            if (uiObjects != null)
             {
-                if(uiObjects[i].gameObject == null)
+                for (int i = 0; i < uiObjects.Count; i++)
                 {
-                    findUI();
-                    break;
-                }
+                    if (uiObjects[i] == null || uiObjects[i].gameObject == null)
+                    {
+                        findUI();
+                        break;
+                    }
 
-                uiObjects[i].gameObject.SetActive(uiState);
+                    try
+                    {
+                        uiObjects[i].gameObject.SetActive(uiState);
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogWarning($"YuME: Unable to set UI object active state: {e.Message}");
+                    }
+                }
             }
         }
     }
@@ -940,11 +932,7 @@ public class YuME_mapEditor : EditorWindow
         {
             foreach(Transform tiles in layers)
             {
-#if UNITY_2018_3_OR_NEWER
                 GameObject clone = (GameObject)PrefabUtility.InstantiatePrefab(PrefabUtility.GetCorrespondingObjectFromSource(tiles.gameObject) as GameObject);
-#else
-                GameObject clone = (GameObject)PrefabUtility.InstantiatePrefab(PrefabUtility.GetPrefabParent(tiles.gameObject) as GameObject);
-#endif
                 if (clone != null)
                 {
                     clone.transform.position = tiles.position;
@@ -1249,6 +1237,12 @@ public class YuME_mapEditor : EditorWindow
 
     static void drawTileButtons(int index)
     {
+        if (currentTileSetObjects == null || index < 0 || index >= currentTileSetObjects.Length)
+        {
+            Debug.LogWarning($"YuME: Cannot draw tile button - invalid index {index}");
+            return;
+        }
+
         if(currentTileSetObjects[index] != null)
         {
             //By passing a Prefab or GameObject into AssetPreview.GetAssetPreview you get a texture that shows this object
@@ -1273,10 +1267,26 @@ public class YuME_mapEditor : EditorWindow
                 setTileBrush(index);
             }
         }
+        else
+        {
+            Debug.LogWarning($"YuME: Tileset object at index {index} is null");
+        }
     }
 
     public static void setTileBrush(int index)
     {
+        if (currentTileSetObjects == null)
+        {
+            Debug.LogWarning("YuME: Cannot set tile brush - current tileset objects is null");
+            return;
+        }
+
+        if (index < 0 || index >= currentTileSetObjects.Length)
+        {
+            Debug.LogWarning($"YuME: Cannot set tile brush - index {index} is out of range (0-{currentTileSetObjects.Length - 1})");
+            return;
+        }
+
         if (currentTileSetObjects[index] != null)
         {
             currentBrushIndex = index;
@@ -1286,6 +1296,10 @@ public class YuME_mapEditor : EditorWindow
             tileRotationX = 0f;
             YuME_brushFunctions.updateBrushTile();
             selectedTool = toolIcons.brushTool;
+        }
+        else
+        {
+            Debug.LogWarning($"YuME: Cannot set tile brush - tileset object at index {index} is null");
         }
     }
 
@@ -1425,10 +1439,22 @@ public class YuME_mapEditor : EditorWindow
         {
             gridSceneObject = GameObject.Find("YuME_MapEditorObject");
         }
-        else
+        
+        if (gridSceneObject != null)
         {
-                gridSceneObject.GetComponent<YuME_GizmoGrid>().twoPointFiveDMode = editorPreferences.twoPointFiveDMode;
-                SceneView.RepaintAll();
+            try
+            {
+                var gizmoGrid = gridSceneObject.GetComponent<YuME_GizmoGrid>();
+                if (gizmoGrid != null && editorPreferences != null)
+                {
+                    gizmoGrid.twoPointFiveDMode = editorPreferences.twoPointFiveDMode;
+                    SceneView.RepaintAll();
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"YuME: Unable to update grid type: {e.Message}");
+            }
         }
     }
 
@@ -1438,22 +1464,35 @@ public class YuME_mapEditor : EditorWindow
         {
             gridSceneObject = GameObject.Find("YuME_MapEditorObject");
         }
-        else
+        
+        if (gridSceneObject != null)
         { 
             try
             {
-                gridSceneObject.GetComponent<YuME_GizmoGrid>().tileSize = globalScale;
-                gridSceneObject.GetComponent<YuME_GizmoGrid>().centreGrid = editorPreferences.centreGrid;
+                var gizmoGrid = gridSceneObject.GetComponent<YuME_GizmoGrid>();
+                if (gizmoGrid != null)
+                {
+                    gizmoGrid.tileSize = globalScale;
+                    gizmoGrid.centreGrid = editorPreferences != null ? editorPreferences.centreGrid : true;
+                }
             }
-            catch
+            catch (System.Exception e)
             {
-                gridSceneObject.GetComponent<YuME_GizmoGrid>().tileSize = 1f;
-                gridSceneObject.GetComponent<YuME_GizmoGrid>().centreGrid = true;
+                Debug.LogWarning($"YuME: Unable to update grid scale: {e.Message}");
+                // Fallback to default values
+                if (gridSceneObject != null)
+                {
+                    var gizmoGrid = gridSceneObject.GetComponent<YuME_GizmoGrid>();
+                    if (gizmoGrid != null)
+                    {
+                        gizmoGrid.tileSize = 1f;
+                        gizmoGrid.centreGrid = true;
+                    }
+                }
             }
         }
 
         _globalScale = globalScale;
-        //gridDimensions = gridDimensions;
     }
 
     // ----------------------------------------------------------------------------------------------------
@@ -1481,30 +1520,43 @@ public class YuME_mapEditor : EditorWindow
             return;
         }
 
-        Vector2 mousePosition = new Vector2(Event.current.mousePosition.x, Event.current.mousePosition.y);
-
-        Ray ray = HandleUtility.GUIPointToWorldRay(mousePosition);
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit, Mathf.Infinity, 1 << LayerMask.NameToLayer("YuME_TileMap")) == true)
+        if (gridSceneObject == null)
         {
-            Vector3 shiftOffset = gridSceneObject.transform.position;
-            shiftOffset.x = shiftOffset.x - (int)shiftOffset.x;
-            shiftOffset.y = shiftOffset.y - (int)shiftOffset.y;
-            shiftOffset.z = shiftOffset.z - (int)shiftOffset.z;
+            Debug.LogWarning("YuME: Cannot update mouse position - grid scene object is null");
+            return;
+        }
 
-            if (!editorPreferences.twoPointFiveDMode)
+        try
+        {
+            Vector2 mousePosition = new Vector2(Event.current.mousePosition.x, Event.current.mousePosition.y);
+
+            Ray ray = HandleUtility.GUIPointToWorldRay(mousePosition);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, 1 << LayerMask.NameToLayer("YuME_TileMap")) == true)
             {
-                tilePosition.x = Mathf.Round(((hit.point.x + shiftOffset.x) - hit.normal.x * 0.001f) / globalScale) * globalScale - shiftOffset.x;
-                tilePosition.z = Mathf.Round(((hit.point.z + shiftOffset.z) - hit.normal.z * 0.001f) / globalScale) * globalScale - shiftOffset.z;
-                tilePosition.y = gridHeight + gridSceneObject.transform.position.y;
+                Vector3 shiftOffset = gridSceneObject.transform.position;
+                shiftOffset.x = shiftOffset.x - (int)shiftOffset.x;
+                shiftOffset.y = shiftOffset.y - (int)shiftOffset.y;
+                shiftOffset.z = shiftOffset.z - (int)shiftOffset.z;
+
+                if (editorPreferences != null && !editorPreferences.twoPointFiveDMode)
+                {
+                    tilePosition.x = Mathf.Round(((hit.point.x + shiftOffset.x) - hit.normal.x * 0.001f) / globalScale) * globalScale - shiftOffset.x;
+                    tilePosition.z = Mathf.Round(((hit.point.z + shiftOffset.z) - hit.normal.z * 0.001f) / globalScale) * globalScale - shiftOffset.z;
+                    tilePosition.y = gridHeight + gridSceneObject.transform.position.y;
+                }
+                else
+                {
+                    tilePosition.x = Mathf.Round(((hit.point.x + shiftOffset.x) - hit.normal.x * 0.001f) / globalScale) * globalScale - shiftOffset.x;
+                    tilePosition.y = Mathf.Round(((hit.point.y + shiftOffset.y) - hit.normal.y * 0.001f) / globalScale) * globalScale - shiftOffset.y;
+                    tilePosition.z = gridHeight + gridSceneObject.transform.position.z;
+                }
             }
-            else
-            {
-                tilePosition.x = Mathf.Round(((hit.point.x + shiftOffset.x) - hit.normal.x * 0.001f) / globalScale) * globalScale - shiftOffset.x;
-                tilePosition.y = Mathf.Round(((hit.point.y + shiftOffset.y) - hit.normal.y * 0.001f) / globalScale) * globalScale - shiftOffset.y;
-                tilePosition.z = gridHeight + gridSceneObject.transform.position.z;
-            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"YuME: Error updating scene mouse position: {e.Message}");
         }
     }
 

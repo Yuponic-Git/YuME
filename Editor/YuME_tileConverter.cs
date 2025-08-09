@@ -16,8 +16,6 @@ class YuME_tileConverter : EditorWindow
 
     static Vector2 _scrollPosition;
 
-    public enum importSettings { newTileset, reimport, added };
-
     [MenuItem("Window/Yuponic/YuME: Tile Converter")]
     static void Initialize()
     {
@@ -102,11 +100,23 @@ class YuME_tileConverter : EditorWindow
         }
 
         userSettings.c_destinationFolder = YuTools_Utils.shortenAssetPath(userSettings.c_destinationFolder);
+        
+        // Ensure destinationFolder is never empty or invalid
+        if (string.IsNullOrEmpty(userSettings.c_destinationFolder) || !userSettings.c_destinationFolder.StartsWith("Assets/"))
+        {
+            userSettings.c_destinationFolder = "Assets/";
+        }
 
         EditorGUILayout.Space();
         EditorGUILayout.EndVertical();
 
         userSettings.c_sourceFolder = YuTools_Utils.shortenAssetPath(userSettings.c_sourceFolder);
+        
+        // Ensure sourceFolder is never empty or invalid
+        if (string.IsNullOrEmpty(userSettings.c_sourceFolder) || !userSettings.c_sourceFolder.StartsWith("Assets/"))
+        {
+            userSettings.c_sourceFolder = "Assets/";
+        }
 
         // ----------------------------------------------------------------------------------------------------
         // ------ Name Settings
@@ -180,7 +190,7 @@ class YuME_tileConverter : EditorWindow
 
 				if(tileDestinationFolderWarning)
 				{
-					createTileSet(importSettings.newTileset);
+					createTileSet(false);
                     recreateCustomBrushes(userSettings.c_destinationFolder);
 					cleanUpImport();
 				}
@@ -212,7 +222,7 @@ class YuME_tileConverter : EditorWindow
 
                 if (tileDestinationFolderWarning)
                 {
-                    createTileSet(importSettings.reimport);
+                    createTileSet(true);
                     recreateCustomBrushes(userSettings.c_destinationFolder);
                     cleanUpImport();
                 }
@@ -222,39 +232,6 @@ class YuME_tileConverter : EditorWindow
         {
             EditorGUILayout.HelpBox("Set a source and destination directories to start conversion", MessageType.Warning);
         }
-
-        // ----------------------------------------------------------------------------------------------------
-        // ------ Just Add Button 
-        // ----------------------------------------------------------------------------------------------------
-
-        //EditorGUILayout.Space();
-
-        if (userSettings.c_sourceFolder != "" && userSettings.c_destinationFolder != "")
-        {
-            EditorGUILayout.HelpBox("Use to only add new tiles to the Tile Set.", MessageType.Info);
-            if (GUILayout.Button("Add to Tileset", GUILayout.Height(40)))
-            {
-                bool tileDestinationFolderWarning = true;
-
-                if (userSettings.c_destinationFolder == "Assets/")
-                {
-                    tileDestinationFolderWarning = EditorUtility.DisplayDialog("Tile Prefabs will be created in the root Assets Folder",
-                        "Are you sure you want create the tile prefabs in the root Asset/ folder?", "OK", "Cancel");
-                }
-
-                if (tileDestinationFolderWarning)
-                {
-                    createTileSet(importSettings.added);
-                    recreateCustomBrushes(userSettings.c_destinationFolder);
-                    cleanUpImport();
-                }
-            }
-        }
-        else
-        {
-            EditorGUILayout.HelpBox("Set a source and destination directories to start conversion", MessageType.Warning);
-        }
-
 
         // ----------------------------------------------------------------------------------------------------
         // ------ Output Folder Information
@@ -283,7 +260,7 @@ class YuME_tileConverter : EditorWindow
         }
     }
 
-    static void createTileSet(importSettings import)
+    static void createTileSet(bool reImport)
     {
         updatedPrefabsCounter = 0;
         newPrefabsCounter = 0;
@@ -313,7 +290,7 @@ class YuME_tileConverter : EditorWindow
             // display the conversion progress based on the number of tiles found on the source tile set
             EditorUtility.DisplayProgressBar("Building Tile Set", "Tile " + tileImportProgress + " / " + sourcePrefabs.Length + " being exported", (float)(tileImportProgress / sourcePrefabs.Length));
 
-			validTile = convertPrefabNew(child.gameObject, child.name, import);
+			validTile = convertPrefabNew(child.gameObject, child.name, reImport);
 
             if (!validTile)
             {
@@ -344,7 +321,7 @@ class YuME_tileConverter : EditorWindow
         EditorUtility.ClearProgressBar();
     }
 
-    static bool convertPrefabNew(GameObject tile, string name, importSettings importType)
+    static bool convertPrefabNew(GameObject tile, string name, bool reImport)
     {
         GameObject pivotGameObject = new GameObject();
         GameObject newTile = (GameObject)Object.Instantiate(tile);
@@ -370,7 +347,7 @@ class YuME_tileConverter : EditorWindow
         // Check if the prefab already exisits and update it - or create a new prefab
         if (prefabAlreadyCreated != null)
         {
-            if(importType == importSettings.reimport)
+            if(reImport)
             {
                 GameObject restorePivot = prefabAlreadyCreated.transform.GetChild(0).gameObject;
                 pivotGameObject.transform.position = restorePivot.transform.localPosition;
@@ -378,20 +355,12 @@ class YuME_tileConverter : EditorWindow
                 pivotGameObject.transform.localScale = restorePivot.transform.localScale;
             }
             updatedPrefabsCounter++; // increment the counter of updated prefabs for the finished log
-#if UNITY_2018_3_OR_NEWER
             PrefabUtility.SaveAsPrefabAssetAndConnect(tileParentObject, userSettings.c_destinationFolder + "/" + userSettings.c_appendName + name + "_YuME.prefab", InteractionMode.AutomatedAction);
-#else
-            PrefabUtility.ReplacePrefab(tileParentObject, prefabAlreadyCreated, ReplacePrefabOptions.ReplaceNameBased); // replace the existing prefab with the updated data
-#endif
         }
         else
         {
             newPrefabsCounter++; // increment the counter of new prefabs for the finished log
-#if UNITY_2018_3_OR_NEWER
             PrefabUtility.SaveAsPrefabAsset(tileParentObject, userSettings.c_destinationFolder + "/" + tileParentObject.name + "_YuME.prefab");
-#else
-            PrefabUtility.CreatePrefab(userSettings.c_destinationFolder + "/" + tileParentObject.name + "_YuME.prefab", tileParentObject);
-#endif
         }
 
         DestroyImmediate(tileParentObject);
@@ -405,11 +374,7 @@ class YuME_tileConverter : EditorWindow
         {
             foreach(Transform child in YuME_mapEditor.tileMapParent.transform)
             {
-#if UNITY_2018_3_OR_NEWER
                 PrefabUtility.RevertPrefabInstance(child.gameObject, InteractionMode.AutomatedAction);
-#else
-                PrefabUtility.RevertPrefabInstance(child.gameObject);
-#endif
             }
         }
     }
@@ -449,11 +414,7 @@ class YuME_tileConverter : EditorWindow
                     }
                 }
 
-#if UNITY_2018_3_OR_NEWER
                 PrefabUtility.SaveAsPrefabAssetAndConnect(newTileParent, userSettings.destinationFolder + "/CustomBrushes/" + brush.name + ".prefab", InteractionMode.AutomatedAction);
-#else
-                PrefabUtility.ReplacePrefab(newTileParent, prefabAlreadyCreated, ReplacePrefabOptions.ReplaceNameBased); // replace the existing prefab with the updated data
-#endif
                 DestroyImmediate(newTileParent);
                 customBrushCounter++;
             }
@@ -499,11 +460,7 @@ class YuME_tileConverter : EditorWindow
                         }
                     }
 
-#if UNITY_2018_3_OR_NEWER
                     PrefabUtility.SaveAsPrefabAssetAndConnect(newTileParent, path + "/CustomBrushes/" + brush.name + ".prefab", InteractionMode.AutomatedAction);
-#else
-                    PrefabUtility.ReplacePrefab(newTileParent, prefabAlreadyCreated, ReplacePrefabOptions.ReplaceNameBased); // replace the existing prefab with the updated data
-#endif
                     DestroyImmediate(newTileParent);
                     customBrushCounter++;
                 }

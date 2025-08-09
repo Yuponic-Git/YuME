@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -52,9 +53,22 @@ public class YuTools_Utils : EditorWindow
 
     public static GameObject[] loadDirectoryContents(string path, string patternSearch)
     {
+        if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(patternSearch))
+        {
+            Debug.LogWarning("YuME: Invalid path or pattern search provided to loadDirectoryContents");
+            return new GameObject[0];
+        }
+
         try
         {
             string fullPath = Application.dataPath.Replace("/Assets", "") + "/" + path; // Build a true path for the system functions to read the directory contents
+            
+            if (!Directory.Exists(fullPath))
+            {
+                Debug.LogWarning($"YuME: Directory does not exist: {fullPath}");
+                return new GameObject[0];
+            }
+
             string[] folderContents = Directory.GetFiles(fullPath, searchPattern: patternSearch); // Read the contents of the directory using the provided pattern search
             GameObject[] returnGameObjects = new GameObject[folderContents.Length]; // create a new array of GameObjects matching the directory contents
 
@@ -62,23 +76,44 @@ public class YuTools_Utils : EditorWindow
             {
                 int findAssetRoot = folderContents[i].IndexOf("Assets"); // Find the start of Unity's internal path for loading assets
 
-                string loadPath = folderContents[i].Substring(findAssetRoot, folderContents[i].Length - findAssetRoot); // create a path that Unity can use
-                returnGameObjects[i] = AssetDatabase.LoadAssetAtPath(loadPath, typeof(GameObject)) as GameObject; // store the loaded asset in the return array
+                if (findAssetRoot >= 0)
+                {
+                    string loadPath = folderContents[i].Substring(findAssetRoot, folderContents[i].Length - findAssetRoot); // create a path that Unity can use
+                    returnGameObjects[i] = AssetDatabase.LoadAssetAtPath(loadPath, typeof(GameObject)) as GameObject; // store the loaded asset in the return array
+                }
+                else
+                {
+                    Debug.LogWarning($"YuME: Invalid asset path found: {folderContents[i]}");
+                }
             }
 
             return returnGameObjects;
         }
-        catch
+        catch (System.Exception e)
         {
-            return null;
+            Debug.LogWarning($"YuME: Failed to load directory contents: {e.Message}");
+            return new GameObject[0];
         }
     }
 
     public static string[] getDirectoryContents(string path, string patternSearch)
     {
+        if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(patternSearch))
+        {
+            Debug.LogWarning("YuME: Invalid path or pattern search provided to getDirectoryContents");
+            return new string[0];
+        }
+
         try
         {
             string fullPath = Application.dataPath.Replace("/Assets", "") + "/" + path; // Build a true path for the system functions to read the directory contents
+            
+            if (!Directory.Exists(fullPath))
+            {
+                Debug.LogWarning($"YuME: Directory does not exist: {fullPath}");
+                return new string[0];
+            }
+
             string[] folderContents = Directory.GetFiles(fullPath, searchPattern: patternSearch); // Read the contents of the directory using the provided pattern search
             
             for(int i = 0; i < folderContents.Length; i++)
@@ -87,9 +122,10 @@ public class YuTools_Utils : EditorWindow
             }
             return folderContents;
         }
-        catch
+        catch (System.Exception e)
         {
-            return null;
+            Debug.LogWarning($"YuME: Failed to get directory contents: {e.Message}");
+            return new string[0];
         }
     }
 
@@ -103,52 +139,105 @@ public class YuTools_Utils : EditorWindow
 
     public static int numberOfFilesInFolder(string path, string patternSearch) // returns an array of files contained in a folder
     {
-        string fullPath = Application.dataPath.Replace("/Assets", "") + "/" + path;
-        string[] folderContents = Directory.GetFiles(fullPath, searchPattern: patternSearch);
-        return folderContents.Length;
+        if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(patternSearch))
+        {
+            Debug.LogWarning("YuME: Invalid path or pattern search provided to numberOfFilesInFolder");
+            return 0;
+        }
+
+        try
+        {
+            string fullPath = Application.dataPath.Replace("/Assets", "") + "/" + path;
+            
+            if (!Directory.Exists(fullPath))
+            {
+                Debug.LogWarning($"YuME: Directory does not exist: {fullPath}");
+                return 0;
+            }
+
+            string[] folderContents = Directory.GetFiles(fullPath, searchPattern: patternSearch);
+            return folderContents.Length;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"YuME: Failed to count files in folder: {e.Message}");
+            return 0;
+        }
     }
 
     public static string getAssetPath(UnityEngine.Object sourceAsset)
     {
-        string path = "";
+        if (sourceAsset == null)
+        {
+            Debug.LogWarning("YuME: Cannot get asset path for null object");
+            return string.Empty;
+        }
 
         try
         {
-            path = AssetDatabase.GetAssetPath(sourceAsset).Replace(sourceAsset.name + ".asset", "");
+            string path = AssetDatabase.GetAssetPath(sourceAsset);
+            if (!string.IsNullOrEmpty(path) && !string.IsNullOrEmpty(sourceAsset.name))
+            {
+                return path.Replace(sourceAsset.name + ".asset", "");
+            }
+            return string.Empty;
         }
-        catch
+        catch (System.Exception e)
         {
-            path = "";
+            Debug.LogWarning($"YuME: Failed to get asset path: {e.Message}");
+            return string.Empty;
         }
-
-        return path;
     }
 
     public static string getAssetPath(GameObject sourceAsset)
     {
-        string path = AssetDatabase.GetAssetPath(sourceAsset).Replace(sourceAsset.name + ".asset", "");
+        if (sourceAsset == null)
+        {
+            Debug.LogWarning("YuME: Cannot get asset path for null GameObject");
+            return null;
+        }
 
-        if (path != null)
-		{
-        	return path;
-		}
-		else
-		{
-			return null;
-		}
+        try
+        {
+            string path = AssetDatabase.GetAssetPath(sourceAsset);
+            if (!string.IsNullOrEmpty(path) && !string.IsNullOrEmpty(sourceAsset.name))
+            {
+                path = path.Replace(sourceAsset.name + ".asset", "");
+                return !string.IsNullOrEmpty(path) ? path : null;
+            }
+            return null;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"YuME: Failed to get GameObject asset path: {e.Message}");
+            return null;
+        }
     }
 
     public static string shortenAssetPath(string path)
     {
+        if (string.IsNullOrEmpty(path))
+        {
+            return "Assets/";
+        }
+        
         if (!path.StartsWith("Assets/"))
         {
             try
             {
-                path = path.Substring(path.IndexOf("Assets/"));
+                int assetsIndex = path.IndexOf("Assets/");
+                if (assetsIndex >= 0)
+                {
+                    path = path.Substring(assetsIndex);
+                }
+                else
+                {
+                    path = "Assets/";
+                }
             }
             catch
             {
-                path = "";
+                path = "Assets/";
             }
         }
 
@@ -228,5 +317,59 @@ public class YuTools_Utils : EditorWindow
         n.stringValue = tagName;
 
         tagManager.ApplyModifiedProperties();
+    }
+
+    public static void ensureFolderExists(string folderPath)
+    {
+        if (string.IsNullOrEmpty(folderPath) || !folderPath.StartsWith("Assets/"))
+        {
+            return;
+        }
+        
+        if (!AssetDatabase.IsValidFolder(folderPath))
+        {
+            string[] folders = folderPath.Split('/');
+            string currentPath = "";
+            for (int i = 0; i < folders.Length; i++)
+            {
+                if (i == 0)
+                {
+                    currentPath = folders[i];
+                    continue;
+                }
+                
+                string parentPath = currentPath;
+                currentPath += "/" + folders[i];
+                
+                if (!AssetDatabase.IsValidFolder(currentPath))
+                {
+                    AssetDatabase.CreateFolder(parentPath, folders[i]);
+                }
+            }
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------
+    // ----- Validation Helpers
+    // ----------------------------------------------------------------------------------------------------
+    
+    public static bool isValidIndex<T>(T[] array, int index)
+    {
+        return array != null && index >= 0 && index < array.Length;
+    }
+    
+    public static bool isValidIndex<T>(List<T> list, int index)
+    {
+        return list != null && index >= 0 && index < list.Count;
+    }
+    
+    public static bool isValidGameObject(GameObject obj)
+    {
+        return obj != null && !obj.Equals(null);
+    }
+    
+    public static bool isValidComponent<T>(T component) where T : Component
+    {
+        return component != null && !component.Equals(null);
     }
 }

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using System;
+using System.Collections.Generic;
 using UnityEditor.SceneManagement;
 using System.Linq;
 
@@ -70,20 +71,45 @@ public class YuME_tileFunctions : EditorWindow
 
 	public static void eraseTile(Vector3 position)
 	{
-        if (YuME_mapEditor.findTileMapParent())
+        if (!YuME_mapEditor.findTileMapParent())
         {
-            GameObject currentLayer = YuME_mapEditor.mapLayers[YuME_mapEditor.currentLayer - 1];
-            Vector3 tempVec3;
+            Debug.LogWarning("YuME: Cannot erase tile - no tile map parent found");
+            return;
+        }
 
-            for (int i = 0; i < currentLayer.transform.childCount; ++i)
+        if (YuME_mapEditor.mapLayers == null || YuME_mapEditor.currentLayer < 1 || YuME_mapEditor.currentLayer > YuME_mapEditor.mapLayers.Length)
+        {
+            Debug.LogWarning("YuME: Cannot erase tile - invalid layer selection");
+            return;
+        }
+
+        GameObject currentLayer = YuME_mapEditor.mapLayers[YuME_mapEditor.currentLayer - 1];
+        if (currentLayer == null)
+        {
+            Debug.LogWarning("YuME: Cannot erase tile - current layer is null");
+            return;
+        }
+
+        Vector3 tempVec3;
+
+        for (int i = 0; i < currentLayer.transform.childCount; ++i)
+        {
+            var child = currentLayer.transform.GetChild(i);
+            if (child == null) continue;
+
+            tempVec3 = child.transform.position;
+
+            if (tempVec3.x == position.x && tempVec3.z == position.z && tempVec3.y >= position.y && tempVec3.y < position.y + 1f)
             {
-                tempVec3 = currentLayer.transform.GetChild(i).transform.position;
-
-                if (tempVec3.x == position.x && tempVec3.z == position.z && tempVec3.y >= position.y && tempVec3.y < position.y + 1f)
+                try
                 {
-                    Undo.DestroyObjectImmediate(currentLayer.transform.GetChild(i).gameObject);
+                    Undo.DestroyObjectImmediate(child.gameObject);
                     EditorSceneManager.MarkAllScenesDirty();
                     return;
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"YuME: Failed to erase tile: {e.Message}");
                 }
             }
         }
@@ -102,11 +128,7 @@ public class YuME_tileFunctions : EditorWindow
 
                 if (tempVec3.x == position.x && tempVec3.z == position.z && tempVec3.y >= position.y && tempVec3.y < position.y + 1f)
                 {
-#if UNITY_2018_3_OR_NEWER
                     YuME_mapEditor.currentTile = AssetDatabase.LoadAssetAtPath(AssetDatabase.GetAssetPath(PrefabUtility.GetCorrespondingObjectFromSource(currentLayer.transform.GetChild(i).gameObject)), typeof(GameObject)) as GameObject;
-#else
-                    YuME_mapEditor.currentTile = AssetDatabase.LoadAssetAtPath(AssetDatabase.GetAssetPath(PrefabUtility.GetPrefabParent(currentLayer.transform.GetChild(i).gameObject)), typeof(GameObject)) as GameObject;
-#endif
 
                     float pickRotation = 0;
                     float pickRotationX = 0;
@@ -173,13 +195,18 @@ public class YuME_tileFunctions : EditorWindow
 
     public static void checkTileSelectionStatus()
     {
-        if(YuME_mapEditor.selectedTiles.Count == 0 && Selection.gameObjects.Length > 0)
+        if (YuME_mapEditor.selectedTiles == null)
+        {
+            YuME_mapEditor.selectedTiles = new List<GameObject>();
+        }
+
+        if (YuME_mapEditor.selectedTiles.Count == 0 && Selection.gameObjects != null && Selection.gameObjects.Length > 0)
         {
             YuME_mapEditor.selectedTiles.Clear();
 
             foreach(GameObject tile in Selection.gameObjects)
             {
-                if(tile.GetComponent<YuME_tileGizmo>() != null)
+                if (tile != null && tile.GetComponent<YuME_tileGizmo>() != null)
                 {
                     YuME_mapEditor.selectedTiles.Add(tile);
                 }
@@ -189,27 +216,51 @@ public class YuME_tileFunctions : EditorWindow
 
     public static void selectTile(Vector3 position)
     {
-        if (YuME_mapEditor.findTileMapParent())
+        if (!YuME_mapEditor.findTileMapParent())
         {
-            GameObject currentLayer = YuME_mapEditor.mapLayers[YuME_mapEditor.currentLayer - 1];
+            Debug.LogWarning("YuME: Cannot select tile - no tile map parent found");
+            return;
+        }
 
-            for (int i = 0; i < currentLayer.transform.childCount; ++i)
+        if (YuME_mapEditor.mapLayers == null || YuME_mapEditor.currentLayer < 1 || YuME_mapEditor.currentLayer > YuME_mapEditor.mapLayers.Length)
+        {
+            Debug.LogWarning("YuME: Cannot select tile - invalid layer selection");
+            return;
+        }
+
+        GameObject currentLayer = YuME_mapEditor.mapLayers[YuME_mapEditor.currentLayer - 1];
+        if (currentLayer == null)
+        {
+            Debug.LogWarning("YuME: Cannot select tile - current layer is null");
+            return;
+        }
+
+        if (YuME_mapEditor.selectedTiles == null)
+        {
+            YuME_mapEditor.selectedTiles = new List<GameObject>();
+        }
+
+        for (int i = 0; i < currentLayer.transform.childCount; ++i)
+        {
+            var child = currentLayer.transform.GetChild(i);
+            if (child == null) continue;
+
+            float distanceToTile = Vector3.Distance(child.transform.position, position);
+
+            if (distanceToTile < 0.1f && child.name != "YuME_brushTile")
             {
-                float distanceToTile = Vector3.Distance(currentLayer.transform.GetChild(i).transform.position, position);
-
-                if (distanceToTile < 0.1f && currentLayer.transform.GetChild(i).name != "YuME_brushTile")
+                // Check if already selected
+                for (int t = 0; t < YuME_mapEditor.selectedTiles.Count; t++)
                 {
-                    for (int t = 0; t < YuME_mapEditor.selectedTiles.Count; t++)
+                    if (YuME_mapEditor.selectedTiles[t] != null && 
+                        child.gameObject.transform.position == YuME_mapEditor.selectedTiles[t].transform.position)
                     {
-                        if (currentLayer.transform.GetChild(i).gameObject.transform.position == YuME_mapEditor.selectedTiles[t].transform.position)
-                        {
-                            return;
-                        }
+                        return;
                     }
-
-                    YuME_mapEditor.selectedTiles.Add(currentLayer.transform.GetChild(i).gameObject);
-                    return;
                 }
+
+                YuME_mapEditor.selectedTiles.Add(child.gameObject);
+                return;
             }
         }
     }
@@ -335,32 +386,63 @@ public class YuME_tileFunctions : EditorWindow
 
     public static void restoreIsolatedGridTiles()
     {
-        if (YuME_mapEditor.isolatedGridObjects.Count > 0)
+        if (YuME_mapEditor.isolatedGridObjects != null && YuME_mapEditor.isolatedGridObjects.Count > 0)
         {
             foreach (GameObject tile in YuME_mapEditor.isolatedGridObjects)
             {
                 if (tile != null)
                 {
-                    tile.SetActive(true);
+                    try
+                    {
+                        tile.SetActive(true);
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogWarning($"YuME: Failed to restore isolated tile: {e.Message}");
+                    }
                 }
             }
         }
 
-        YuME_mapEditor.isolatedGridObjects.Clear();
+        if (YuME_mapEditor.isolatedGridObjects != null)
+        {
+            YuME_mapEditor.isolatedGridObjects.Clear();
+        }
     }
 
     public static void isolateLayerTiles()
     {
         restoreIsolatedLayerTiles();
 
-        if (YuME_mapEditor.findTileMapParent())
+        if (!YuME_mapEditor.findTileMapParent())
         {
-            foreach (Transform tile in YuME_mapEditor.tileMapParent.transform)
+            Debug.LogWarning("YuME: Cannot isolate layer tiles - no tile map parent found");
+            return;
+        }
+
+        if (YuME_mapEditor.tileMapParent == null)
+        {
+            Debug.LogWarning("YuME: Cannot isolate layer tiles - tile map parent is null");
+            return;
+        }
+
+        if (YuME_mapEditor.isolatedLayerObjects == null)
+        {
+            YuME_mapEditor.isolatedLayerObjects = new List<GameObject>();
+        }
+
+        foreach (Transform tile in YuME_mapEditor.tileMapParent.transform)
+        {
+            if (tile != null && tile.name != "layer" + YuME_mapEditor.currentLayer)
             {
-                if (tile.name != "layer" + YuME_mapEditor.currentLayer)
+                try
                 {
                     tile.gameObject.SetActive(false);
                     YuME_mapEditor.isolatedLayerObjects.Add(tile.gameObject);
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"YuME: Failed to isolate layer tile: {e.Message}");
                 }
             }
         }

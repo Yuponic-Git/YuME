@@ -112,11 +112,7 @@ class YuME_prefabSampler : EditorWindow
         prefabParent.name = editorData.appendName + selected[0].name;
         prefabParent.transform.position = Vector3.zero;
 
-#if UNITY_2018_3_OR_NEWER
         PrefabUtility.SaveAsPrefabAsset(prefabParent, appendNumber(editorData.destinationFolder + "/" + prefabParent.name));
-#else
-        PrefabUtility.CreatePrefab(appendNumber(editorData.destinationFolder + "/" + prefabParent.name), prefabParent);
-#endif
 
         DestroyImmediate(prefabParent);
     }

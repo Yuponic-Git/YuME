@@ -150,7 +150,13 @@ public class YuME_freezeMap : EditorWindow
     public static void saveFrozenMesh(string path)
     {
         path = YuTools_Utils.shortenAssetPath(path);
-
+        
+        // Ensure path is never empty or invalid
+        if (string.IsNullOrEmpty(path) || !path.StartsWith("Assets/"))
+        {
+            path = "Assets/";
+        }
+        
         int counter = 1;
 
         if (YuME_mapEditor.findTileMapParent())
@@ -179,11 +185,7 @@ public class YuME_freezeMap : EditorWindow
                         //Unwrapping.GenerateSecondaryUVSet(saveMesh);
                         try
                         {
-#if UNITY_2021_2_OR_NEWER
                             AssetDatabase.CreateAsset(saveMesh, path + "/" + saveMap.name + "Meshes/" + frozenMesh.name + counter + ".asset");
-#else
-
-#endif
                         }
                         catch
                         {
@@ -200,17 +202,9 @@ public class YuME_freezeMap : EditorWindow
                     Object prefabAlreadyCreated = AssetDatabase.LoadAssetAtPath(path + "/" + saveMap.name + ".prefab", typeof(GameObject));
 
                     if (prefabAlreadyCreated != null)
-#if UNITY_2018_3_OR_NEWER
                         PrefabUtility.SaveAsPrefabAssetAndConnect(saveMap, path + "/" + saveMap.name + ".prefab", InteractionMode.AutomatedAction);
-#else
-                        PrefabUtility.ReplacePrefab(saveMap, prefabAlreadyCreated, ReplacePrefabOptions.ReplaceNameBased);
-#endif
                     else
-#if UNITY_2018_3_OR_NEWER
                         PrefabUtility.SaveAsPrefabAsset(saveMap, path + "/" + saveMap.name + ".prefab");
-#else
-                        PrefabUtility.CreatePrefab(path + "/" + saveMap.name + ".prefab", saveMap);
-#endif
 
                     AssetDatabase.SaveAssets();
 

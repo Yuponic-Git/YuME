@@ -12,13 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fc0c88a613c3f74eb7a86a394263bed, type: 3}
   m_Name: YuME_importSettings
   m_EditorClassIdentifier: 
-  sourceTiles: {fileID: 919132149155446097, guid: fdc8d74feef0e094381968577a2428e9, type: 3}
-  sourceMaterial: {fileID: 2100000, guid: b6c1c831675c9334dabd6a907fb5e73a, type: 2}
-  sourceTexture: {fileID: 2800000, guid: e8d69f4783d236245bc6d7424a6a4e03, type: 3}
-  layer:
-    serializedVersion: 2
-    m_Bits: 3
-  tileStatic: 1
+  sourceTiles: {fileID: 100046, guid: 9c17f9b307a55d54880a840580ea9580, type: 3}
+  sourceMaterial: {fileID: 2100000, guid: 677274093d9785c47b4e36a9dc0e06b6, type: 2}
+  sourceTexture: {fileID: 2800000, guid: 5a6b6c2feaed1d74d857879e8881c4f3, type: 3}
+  tileStatic: 0
   shadowCastingMode: 1
   receiveShadows: 1
   altIdentifier: _alt
@@ -28,16 +25,16 @@ MonoBehaviour:
   importCustomBounds: 1
   customBoundsIdentifier: _bounds
   splitByType: 0
-  destinationFolder: Assets/Environment/TileSets/Test Environment
-  meshFolder: Assets/Environment/TileSets/Test Environment/Meshes
+  destinationFolder: Assets/NewYumeTiles
+  meshFolder: Assets/NewYumeTiles/Meshes
   appendName: 
-  c_name: Base Env Tileset
+  c_name: 
   c_tileStatic: 1
-  c_scale: 1
+  c_scale: 0.05
   c_offset: {x: 0, y: -0.5, z: 0}
   c_shadowCastingMode: 1
   c_receiveShadows: 1
   c_bypassCollisionSetup: 0
-  c_destinationFolder: Assets/Tilesets/Base Environment/TileSet
-  c_sourceFolder: Assets/Tilesets/Base Environment/Prefabs
+  c_destinationFolder: 
+  c_sourceFolder: 
   c_appendName: 

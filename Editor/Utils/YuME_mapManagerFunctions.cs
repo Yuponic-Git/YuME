@@ -11,26 +11,67 @@ public class YuME_mapManagerFunctions
 
         if (mainMap == null)
         {
-            Debug.Log("YuME cannot find the defaul map. Please ensure you have a YuME Map named YuME_MapData");
+            Debug.LogWarning("YuME cannot find the default map. Please ensure you have a YuME Map named YuME_MapData");
         }
         else
         {
-            getGridSceneObjectReference(mainMap);
+            try
+            {
+                getGridSceneObjectReference(mainMap);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"YuME: Failed to set default map: {e.Message}");
+            }
         }
     }
 
     public static void setActiveMap()
     {
-        for (int i = 0; i < YuME_mapEditor.ref_MapManager.mapList.Count; i++)
+        if (YuME_mapEditor.ref_MapManager == null)
         {
-            if (YuME_mapEditor.ref_MapManager.mapList[i] != null)
+            Debug.LogWarning("YuME: Cannot set active map - map manager reference is null");
+            return;
+        }
+
+        if (YuME_mapEditor.ref_MapManager.mapList == null)
+        {
+            Debug.LogWarning("YuME: Cannot set active map - map list is null");
+            return;
+        }
+
+        try
+        {
+            for (int i = 0; i < YuME_mapEditor.ref_MapManager.mapList.Count; i++)
             {
-                YuME_mapEditor.ref_MapManager.mapList[i].SetActive(false);
+                if (YuME_mapEditor.ref_MapManager.mapList[i] != null)
+                {
+                    YuME_mapEditor.ref_MapManager.mapList[i].SetActive(false);
+                }
+            }
+
+            if (YuME_mapEditor.currentMapIndex >= 0 && YuME_mapEditor.currentMapIndex < YuME_mapEditor.ref_MapManager.mapList.Count)
+            {
+                var activeMap = YuME_mapEditor.ref_MapManager.mapList[YuME_mapEditor.currentMapIndex];
+                if (activeMap != null)
+                {
+                    activeMap.SetActive(true);
+                    YuME_brushFunctions.updateBrushTile();
+                }
+                else
+                {
+                    Debug.LogWarning($"YuME: Map at index {YuME_mapEditor.currentMapIndex} is null");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"YuME: Invalid map index {YuME_mapEditor.currentMapIndex}");
             }
         }
-        //Debug.Log($"Map Index: {YuME_mapEditor.currentMapIndex}");
-        YuME_mapEditor.ref_MapManager.mapList[YuME_mapEditor.currentMapIndex].SetActive(true);
-        YuME_brushFunctions.updateBrushTile();
+        catch (System.Exception e)
+        {
+            Debug.LogError($"YuME: Failed to set active map: {e.Message}");
+        }
     }
 
     public static GameObject buildNewMap(string mapName)
